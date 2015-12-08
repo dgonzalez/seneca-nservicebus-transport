@@ -1,12 +1,15 @@
 'use strict';
 
+var _ = require('lodash');
+
 module.exports = function(options) {
     
-    console.log("HEEEEERE I AM");
     var seneca = this;
     var plugin = "nservicebus-transport";
     
     var so = seneca.options();
+    
+    var tu = seneca.export('transport/utils');
     
     options = seneca.util.deepextend({
             nservicebus: {
@@ -28,13 +31,24 @@ module.exports = function(options) {
      */
     seneca.add({role: "transport", hook: "listen", type: "nservicebus"}, hook_listen_nservicebus);
     seneca.add({role: "transport", hook: "client", type: "nservicebus"}, hook_listen_nservicebus);
+    /**
+     * Add the legacy handlers to avoid breaking backwards compatibility.
+     */
     
     function hook_listen_nservicebus(args, done) {
-        console.log("----------------------------");
+        var seneca = this
+        var type = args.type
+        var listen_options = seneca.util.clean(_.extend({}, options[type], args))
+        tu.listen_topics(seneca, args, listen_options, function (topic) {
+            console.log(topic);
+        });
     }
     
     function hook_client_nservicebus(args, done) {
-        console.log("-----------------------------");
+        var seneca = this
+        var type = args.type
+        var client_options = seneca.util.clean(_.extend({}, options[type], args))
+        // TODO David: More to come.
     }
     
     return {
