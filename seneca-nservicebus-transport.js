@@ -52,7 +52,7 @@ module.exports = function(options) {
                 channel.on("error", done);
                 
                 tu.listen_topics(seneca, args, listen_options, function (out) {
-                    var q = "SenecaNServiceBus";
+                    var q = "SenecaNServiceBus"; // TODO: We might need two endpoints.
                     seneca.log.debug("listen", "subscribe", q, listen_options, seneca);
                     channel.assertQueue(q);
                     channe.consume(q, on_message);
@@ -79,15 +79,15 @@ module.exports = function(options) {
                         ch.sendToQueue(q, new Buffer(messageContent), options); // TODO Format the message. JSON.
                     });
                 }
+                seneca.add('role:seneca,cmd:close', function (close_args, done) {
+                    var closer = this;
+                    channel.close();
+                    connection.close();
+                    closer.prior(close_args, done);
+                });
+                seneca.log.info('listen', 'open', listen_options, seneca);
+                done();
             }); // createChannel.
-            seneca.add('role:seneca,cmd:close', function (close_args, done) {
-              var closer = this;
-              channel.close();
-              connection.close();
-              closer.prior(close_args, done);
-            });
-            seneca.log.info('listen', 'open', listen_options, seneca);
-            done();
         }); // amqp.connect
     }
     
