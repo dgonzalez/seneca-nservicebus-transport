@@ -64,7 +64,7 @@ module.exports = function(options) {
                 });
                 
                 function on_message (message) {
-                  var messageJson = message.content.toString(); // TODO: Check for undefined.
+                  var messageJson = message.content ? message.content.toString() : undefined;
                   var base64String = extractPayload(messageJson);
                   var data = tu.parseJSON(seneca, 'listen-' + type, new Buffer(base64String, "base64").toString());
                   channel.ack(message);
@@ -121,7 +121,6 @@ module.exports = function(options) {
                     
                     // Subscribe
                     channel.consume("SenecaResQueue", function(message) {
-                        console.log(message);
                         var content = message.content ? message.content.toString() : undefined;
                         var base64String = extractPayload(content);
                         var input = tu.parseJSON(seneca, "client-" + type, new Buffer(base64String, "base64").toString());

@@ -56,7 +56,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="MessageHandlers.cs" />
     <Compile Include="SenecaRes.cs" />
     <Compile Include="EndpointConfig.cs" />
     <Compile Include="SenecaAct.cs" />

@@ -14,3 +14,4 @@ c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNSe
 c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\bin\Release\RabbitMQ.Client.xml
 c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\obj\Release\SenecaNServiceBus.dll
 c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\obj\Release\SenecaNServiceBus.pdb
+C:\Users\david\Documents\Visual Studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\obj\Release\SenecaNServiceBus.csprojResolveAssemblyReference.cache

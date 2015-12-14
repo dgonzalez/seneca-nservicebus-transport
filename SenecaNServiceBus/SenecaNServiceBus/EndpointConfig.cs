@@ -18,6 +18,7 @@ namespace SenecaNServiceBus
                 configuration.UsePersistence<InMemoryPersistence>();
                 configuration.EndpointName("SenecaNServiceBus");
                 configuration.UseSerialization<JsonSerializer>();
+                // TODO: Needs to be extracted.
                 configuration.UseTransport<RabbitMQTransport>().ConnectionString("host=192.168.1.5;username=test;password=test");
                 configuration.EnableInstallers();
             }
