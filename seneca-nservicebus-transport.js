@@ -4,6 +4,7 @@ var _ = require('lodash');
 var amqp = require('amqplib/callback_api');
 
 function extractPayload(message) {
+    // TODO: Terrible hack. For some reason JS is unable to parse it... UTF8 chars?
     return message.substring(message.indexOf('":"') + 3, message.indexOf('"}'));
 }
 
@@ -17,11 +18,11 @@ module.exports = function(options) {
     
     var tu = seneca.export('transport/utils');
     
+    // TODO Configuration has to change
     options = seneca.util.deepextend({
             nservicebus: {
                 timeout: so.timeout ? so.timeout - 555 : 22222,
                 type: 'nservicebus',
-                // TODO David: this needs to change at some point.
                 alivetime: 111,
                 priority: 100,
                 delay: 0,
@@ -56,15 +57,14 @@ module.exports = function(options) {
                 channel.on("error", done);
                 
                 tu.listen_topics(seneca, args, listen_options, function (out) {
-                    var actRecQueue = "TestQueue"; // TODO: This name has to change.
+                    var actRecQueue = "SenecaActQueue";
                     seneca.log.debug("listen", "subscribe", actRecQueue, listen_options, seneca);
                     channel.assertQueue(actRecQueue);
                     channel.consume(actRecQueue, on_message);
-                }); // tu.listen_topics
+                });
                 
                 function on_message (message) {
-                  var messageJson = message.content.toString();
-                  // TODO David: Terrible hack. For some reason JS is unable to parse it... UTF8 chars?
+                  var messageJson = message.content.toString(); // TODO: Check for undefined.
                   var base64String = extractPayload(messageJson);
                   var data = tu.parseJSON(seneca, 'listen-' + type, new Buffer(base64String, "base64").toString());
                   channel.ack(message);
@@ -72,23 +72,16 @@ module.exports = function(options) {
                       if (out == null) {
                           return;
                       }
-                     console.log(out); 
+                     var outstr = new Buffer(tu.stringifyJSON(seneca, 'listen-' + type, out)).toString("base64");
+                     var options = {};
+                     options.messageId = "anotheruniqueidlikeanothersnowflake"; // TODO Replace by seneca tx ID.
+                     options.headers = {
+                         "NServiceBus.EnclosedMessageTypes": "SenecaResMessages.SenecaRes"
+                     };
+                     var message = {};
+                     message.Payload = outstr;
+                     channel.sendToQueue("SenecaNServiceBus", new Buffer(JSON.stringify(message)), options);
                   });
-                //   // Publish
-                //   tu.handle_request(seneca, data, listen_options, function (out) {
-                //       if (out == null) {
-                //           return
-                //       }
-                //       var outstr = tu.stringifyJSON(seneca, 'listen-' + type, out);
-                //       var options = {};
-                //       options.messageId = "bananas";
-                //       options.headers = {
-                //           "NServiceBus.EnclosedMessageTypes": "SenecaNServiceBus.MyMessage"
-                //       };
-                //       var messageContent = {};
-                //       messageContent.Payload = outstr;
-                //       channel.sendToQueue(q, new Buffer(tu.stringifyJSON(messageContent)), options); // TODO Format the message. JSON.
-                //     });
                 }
                 seneca.add('role:seneca,cmd:close', function (close_args, done) {
                     var closer = this;
@@ -127,10 +120,13 @@ module.exports = function(options) {
                     seneca.log.debug('client', 'subscribe', q, client_options, seneca);
                     
                     // Subscribe
-                    channel.consume(q, function(message) {
-                        // TODO David: This is fleky... message has a different structure.
+                    channel.consume("SenecaResQueue", function(message) {
+                        console.log(message);
                         var content = message.content ? message.content.toString() : undefined;
-                        var input = tu.parseJSON(seneca, "client-" + type, result);
+                        var base64String = extractPayload(content);
+                        var input = tu.parseJSON(seneca, "client-" + type, new Buffer(base64String, "base64").toString());
+                        // TODO: Not sure about this ack.
+                        channel.ack(message);
                         tu.handle_response(seneca, input, client_options);
                     });
                     
