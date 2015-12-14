@@ -124,7 +124,6 @@ module.exports = function(options) {
                         var content = message.content ? message.content.toString() : undefined;
                         var base64String = extractPayload(content);
                         var input = tu.parseJSON(seneca, "client-" + type, new Buffer(base64String, "base64").toString());
-                        // TODO: Not sure about this ack.
                         channel.ack(message);
                         tu.handle_response(seneca, input, client_options);
                     });
