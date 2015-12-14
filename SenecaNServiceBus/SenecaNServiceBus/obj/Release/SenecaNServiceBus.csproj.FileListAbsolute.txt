@@ -1,0 +1,16 @@
+c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\bin\Release\SenecaNServiceBus.dll.config
+c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\bin\Release\SenecaNServiceBus.dll
+c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\bin\Release\SenecaNServiceBus.pdb
+c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\bin\Release\NServiceBus.Core.dll
+c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\bin\Release\NServiceBus.Host.exe
+c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\bin\Release\NServiceBus.Transports.RabbitMQ.dll
+c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\bin\Release\RabbitMQ.Client.dll
+c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\bin\Release\NServiceBus.Core.pdb
+c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\bin\Release\NServiceBus.Core.xml
+c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\bin\Release\NServiceBus.Host.pdb
+c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\bin\Release\NServiceBus.Host.xml
+c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\bin\Release\NServiceBus.Transports.RabbitMQ.pdb
+c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\bin\Release\NServiceBus.Transports.RabbitMQ.xml
+c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\bin\Release\RabbitMQ.Client.xml
+c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\obj\Release\SenecaNServiceBus.dll
+c:\users\david\documents\visual studio 2015\Projects\SenecaNServiceBus\SenecaNServiceBus\obj\Release\SenecaNServiceBus.pdb
