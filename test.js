@@ -2,18 +2,16 @@
 var amqp = require('amqplib/callback_api');
 
 amqp.connect('amqp://test:test@localhost', function(err, conn) {
-  conn.createChannel(function(err, ch) {
-    var q = 'Particular.ServiceControl';
-
-    ch.assertQueue(q, {durable: true});
-	
-    var message = {};
-    message.bananas = "hola";
-
-    var options = {};
-    options["messageId"] = "the-very-unique-id-2";
-    ch.sendToQueue(q, new Buffer('{"pepe": "bananas"}'), options);
-    console.log(" [x] Sent 'Hello World!'");
-  });
-  setTimeout(function() { conn.close(); process.exit(0) }, 500);
+    var q = "TestQueue";
+  var ok = conn.createChannel(on_open);
+  function on_open(err, ch) {
+    if (err != null) bail(err);
+    ch.assertQueue(q);
+    ch.consume(q, function(msg) {
+      if (msg !== null) {
+        console.log(msg.content.toString());
+        ch.ack(msg);
+      }
+    });
+  }
 });
