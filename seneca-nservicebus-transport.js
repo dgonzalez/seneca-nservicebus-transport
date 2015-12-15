@@ -4,7 +4,7 @@ var _ = require('lodash');
 var amqp = require('amqplib/callback_api');
 
 function extractPayload(message) {
-    // TODO: For some reason, parseJSON returns an Unknown Token error. This should be fixed.
+    // TODO: For some reason, parseJSON returns an Unknown Token error when reading from a queue. This fixes the problem but we need a better approach.
     return message.substring(message.indexOf('":"') + 3, message.indexOf('"}'));
 }
 
