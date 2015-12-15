@@ -4,7 +4,7 @@ var _ = require('lodash');
 var amqp = require('amqplib/callback_api');
 
 function extractPayload(message) {
-    // TODO: Terrible hack. For some reason JS is unable to parse it... UTF8 chars?
+    // TODO: For some reason, parseJSON returns an Unknown Token error. This should be fixed.
     return message.substring(message.indexOf('":"') + 3, message.indexOf('"}'));
 }
 
@@ -18,35 +18,37 @@ module.exports = function(options) {
     
     var tu = seneca.export('transport/utils');
     
-    // TODO Configuration has to change
     options = seneca.util.deepextend({
             nservicebus: {
                 timeout: so.timeout ? so.timeout - 555 : 22222,
                 type: 'nservicebus',
-                alivetime: 111,
-                priority: 100,
-                delay: 0,
-                port: 11300,
-                host: 'localhost'
+                user: 'test',
+                password: 'test',
+                host: 'localhost',
+                actqueuename: 'SenecaActQueue',
+                resqueuename: 'SenecaResQueue'
             }
     },
     so.transport,
     options);
     
     /**
-     * Add the handlers for listen and client.
+     * Add the handlers for listen and client
      */
     seneca.add({role: "transport", hook: "listen", type: "nservicebus"}, hook_listen_nservicebus);
     seneca.add({role: "transport", hook: "client", type: "nservicebus"}, hook_client_nservicebus);
     
     /**
-     * Add the legacy handlers to avoid breaking backwards compatibility.
+     * Build the connection string
      */
+    var connectionString = "amqp://"+options.nservicebus.user+ ":" + options.nservicebus.password + "@";
+    connectionString += options.nservicebus.host;
+
     function hook_listen_nservicebus(args, done) {
         var seneca = this
         var type = args.type
-        var listen_options = seneca.util.clean(_.extend({}, options[type], args))
-        amqp.connect("amqp://test:test@localhost", function(error, connection){
+        var listen_options = seneca.util.clean(_.extend({}, options[type], args));
+        amqp.connect(connectionString, function(error, connection) {
             if (error) {
                 return done(error);
             }
@@ -57,7 +59,7 @@ module.exports = function(options) {
                 channel.on("error", done);
                 
                 tu.listen_topics(seneca, args, listen_options, function (out) {
-                    var actRecQueue = "SenecaActQueue";
+                    var actRecQueue = options.nservicebus.actqueuename;
                     seneca.log.debug("listen", "subscribe", actRecQueue, listen_options, seneca);
                     channel.assertQueue(actRecQueue);
                     channel.consume(actRecQueue, on_message);
@@ -74,7 +76,7 @@ module.exports = function(options) {
                       }
                      var outstr = new Buffer(tu.stringifyJSON(seneca, 'listen-' + type, out)).toString("base64");
                      var options = {};
-                     options.messageId = "anotheruniqueidlikeanothersnowflake"; // TODO Replace by seneca tx ID.
+                     options.messageId = data.id;
                      options.headers = {
                          "NServiceBus.EnclosedMessageTypes": "SenecaResMessages.SenecaRes"
                      };
@@ -91,8 +93,8 @@ module.exports = function(options) {
                 });
                 seneca.log.info('listen', 'open', listen_options, seneca);
                 done();
-            }); // createChannel.
-        }); // amqp.connect
+            });
+        });
     }
     
     function hook_client_nservicebus(args, client_done) {
@@ -100,7 +102,7 @@ module.exports = function(options) {
         var type = args.type;
         var client_options = seneca.util.clean(_.extend({}, options[type], args));
         
-        amqp.connect("amqp://localhost", function(error, connection) {
+        amqp.connect(connectionString, function(error, connection) {
             if (error) {
                 return client_done(error);
             }
@@ -119,8 +121,8 @@ module.exports = function(options) {
                     
                     seneca.log.debug('client', 'subscribe', q, client_options, seneca);
                     
-                    // Subscribe
-                    channel.consume("SenecaResQueue", function(message) {
+                    // Consume message and handle the response:
+                    channel.consume(options.nservicebus.resqueuename, function(message) {
                         var content = message.content ? message.content.toString() : undefined;
                         var base64String = extractPayload(content);
                         var input = tu.parseJSON(seneca, "client-" + type, new Buffer(base64String, "base64").toString());
@@ -132,7 +134,7 @@ module.exports = function(options) {
                         var outmsg = tu.prepare_request(this, args, done);
                         var outstr = new Buffer(tu.stringifyJSON(seneca, 'client-' + type, outmsg)).toString("base64");
                         var options = {};
-                        options.messageId = "theuniqueidlikeasnowflake"; // TODO David: get seneca tx id.
+                        options.messageId = args.meta$.id;
                         options.headers = {
                             "NServiceBus.EnclosedMessageTypes": "SenecaActMessages.SenecaAct"
                         };
@@ -142,7 +144,6 @@ module.exports = function(options) {
                     });
                 }
             });
-            
         });          
     }
     
